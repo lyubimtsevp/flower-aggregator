@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Цветочные магазины</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .shop {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Цветочные магазины</h1>
+    <div id="shops-container">
+        <!-- Здесь будут магазины -->
+    </div>
+</div>
+
+<script>
+    // Функция для получения данных с сервера
+    async function fetchShops() {
+        try {
+            const response = await fetch('http://localhost:5000/api/shops');
+            const shops = await response.json();
+            const shopsContainer = document.getElementById('shops-container');
+
+            shops.forEach(shop => {
+                const shopDiv = document.createElement('div');
+                shopDiv.className = 'shop';
+                shopDiv.innerHTML = `<h3>${shop.name}</h3>
+                                     <p>Город: ${shop.city || shop.location}</p>
+                                     <p>Адрес: ${shop.address || 'Не указано'}</p>
+                                     <p>Рейтинг: ${shop.rating || 'Не указан'}</p>`;
+                shopsContainer.appendChild(shopDiv);
+            });
+        } catch (error) {
+            console.error('Ошибка при получении данных:', error);
+        }
+    }
+
+    // Вызов функции при загрузке страницы
+    window.onload = fetchShops;
+</script>
+
+</body>
+</html>
