@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/flower-aggregator/static/css/main.9c9f5c9e.css",
+    "main.js": "/flower-aggregator/static/js/main.316562c3.js",
+    "static/js/453.52623090.chunk.js": "/flower-aggregator/static/js/453.52623090.chunk.js",
+    "index.html": "/flower-aggregator/index.html",
+    "main.9c9f5c9e.css.map": "/flower-aggregator/static/css/main.9c9f5c9e.css.map",
+    "main.316562c3.js.map": "/flower-aggregator/static/js/main.316562c3.js.map",
+    "453.52623090.chunk.js.map": "/flower-aggregator/static/js/453.52623090.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.9c9f5c9e.css",
+    "static/js/main.316562c3.js"
+  ]
+}
