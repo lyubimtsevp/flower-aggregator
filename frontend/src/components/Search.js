@@ -1,47 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const Search = () => {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
+function Search() {
+  const [shops, setShops] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredShops, setFilteredShops] = useState([]);
+  const [sortOption, setSortOption] = useState('default');
 
-  const handleSearch = async () => {
-    // Запрос на бэкенд
-    const response = await fetch('http://localhost:5000/api/shops');
-    const data = await response.json();
+  useEffect(() => {
+    const fetchShops = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/shops');
+        const data = await response.json();
+        setShops(data);
+        setFilteredShops(data);
+      } catch (error) {
+        console.error('Ошибка при загрузке данных:', error);
+      }
+    };
 
-    // Фильтрация данных по запросу
-    const filteredResults = data.filter(shop =>
-      shop.location.toLowerCase().includes(query.toLowerCase())
+    fetchShops();
+  }, []);
+
+  useEffect(() => {
+    let filtered = shops.filter((shop) => 
+      shop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (shop.city && shop.city.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
-    setResults(filteredResults);
+    if (sortOption === 'rating') {
+      filtered = filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    }
+
+    setFilteredShops(filtered);
+  }, [searchTerm, sortOption, shops]);
+
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleSortChange = (event) => {
+    setSortOption(event.target.value);
   };
 
   return (
     <div>
-      <h2>Поиск цветочных магазинов</h2>
       <input
         type="text"
-        placeholder="Введите город или название магазина"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Введите город или название"
+        value={searchTerm}
+        onChange={handleSearch}
       />
-      <button onClick={handleSearch}>Найти</button>
-
-      <h3>Результаты поиска:</h3>
+      <select value={sortOption} onChange={handleSortChange}>
+        <option value="default">Сортировать по умолчанию</option>
+        <option value="rating">Сортировать по рейтингу</option>
+      </select>
       <ul>
-        {results.length > 0 ? (
-          results.map((shop) => (
-            <li key={shop.id}>
-              {shop.name} - {shop.location}
-            </li>
-          ))
-        ) : (
-          <li>Результатов нет</li>
-        )}
+        {filteredShops.map((shop) => (
+          <li key={shop._id}>
+            {shop.name} - {shop.city || 'Не указан город'}
+            <p>{shop.rating ? `Рейтинг: ${shop.rating}` : 'Рейтинг не указан'}</p>
+          </li>
+        ))}
       </ul>
     </div>
   );
-};
+}
 
 export default Search;

@@ -2,55 +2,66 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
+// Создание приложения Express
 const app = express();
-app.use(cors()); // Разрешение запросов с других источников
-app.use(express.json()); // Поддержка JSON данных
+app.use(cors());
+app.use(express.json());
 
-// Подключение к базе данных MongoDB
-mongoose.connect('mongodb://localhost:27017/flower-shop', {
+// Подключение к MongoDB
+mongoose.connect('mongodb://127.0.0.1:27017/flower-shop', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-})
-  .then(() => console.log('Подключение к MongoDB успешно!'))
-  .catch((err) => console.log('Ошибка подключения к MongoDB:', err));
-
-// Модель данных для магазинов цветов
-const Shop = mongoose.model('Shop', new mongoose.Schema({
-  name: String,
-  location: String,
-  rating: Number,
-}), 'flowerStores'); // Подключаемся к коллекции 'flowerStores'
-
-// Маршрут для проверки работы сервера
-app.get('/', (req, res) => {
-  res.send('Backend работает!');
 });
 
-// Маршрут для получения всех магазинов
+// Определение схемы и модели для магазинов
+const shopSchema = new mongoose.Schema({
+  name: String,
+  city: String,
+  address: String,
+  rating: Number,
+});
+
+const Shop = mongoose.model('Shop', shopSchema);
+
+// Маршрут для корневого запроса (обработка GET /)
+app.get('/', (req, res) => {
+  res.send('Сервер работает!');
+});
+
+// Получение списка магазинов (GET /api/shops)
 app.get('/api/shops', async (req, res) => {
   try {
-    console.log('Запрос получен на /api/shops');
-    const shops = await Shop.find(); // Получение всех магазинов из базы данных
-    console.log('Магазины найдены:', shops);
-    res.json(shops); // Отправляем данные магазинов
-  } catch (err) {
-    console.error('Ошибка сервера:', err);
-    res.status(500).send('Ошибка сервера');
+    const shops = await Shop.find();
+    res.json(shops);
+  } catch (error) {
+    res.status(500).json({ error: 'Ошибка при получении магазинов' });
   }
 });
 
-// Маршрут для добавления нового магазина
+// Создание нового магазина (POST /api/shops)
 app.post('/api/shops', async (req, res) => {
+  const { name, city, address, rating } = req.body;
+  const newShop = new Shop({ name, city, address, rating });
   try {
-    const newShop = new Shop(req.body); // Создание нового магазина из запроса
-    await newShop.save(); // Сохранение магазина в базе данных
-    res.json(newShop); // Возвращаем данные нового магазина
-  } catch (err) {
-    console.error('Ошибка при добавлении магазина:', err);
-    res.status(500).send('Ошибка при добавлении магазина');
+    await newShop.save();
+    res.status(201).json(newShop);
+  } catch (error) {
+    res.status(500).json({ error: 'Ошибка при создании магазина' });
   }
 });
 
-// Настройка порта и запуск сервера
+// Удаление магазина (DELETE /api/shops/:id)
+app.delete('/api/shops/:id', async (req, res) => {
+  try {
+    await Shop.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: 'Магазин удалён' });
+  } catch (error) {
+    res.status(500).json({ error: 'Ошибка при удалении магазина' });
+  }
+});
+
+// Запуск сервера
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Сервер запущен на порту ${PORT}`);
+});
